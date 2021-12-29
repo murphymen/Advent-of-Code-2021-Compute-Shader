@@ -1,0 +1,28 @@
+Base path: 'D:/Progz/Unity/Editors/2020.3.6f1/Editor/Data', plugins path 'D:/Progz/Unity/Editors/2020.3.6f1/Editor/Data/PlaybackEngines'
+Cmd: initializeCompiler
+
+Cmd: compileComputeKernel
+  insize=1402 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=OneStep cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 2 plat 4 at CellularAutomata.compute(44): invalid type for index - index must be a scalar, or a vector with the correct number of dimensions
+ ok=0 outsize=0
+
+Cmd: compileComputeKernel
+  insize=1419 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=OneStep cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 2 plat 4 at CellularAutomata.compute(44): 'FlatIndex': no matching 4 parameter function
+  error: 2 plat 4 at CellularAutomata.compute(44): undeclared identifier 'heihgt'
+ ok=0 outsize=0
+
+Cmd: compileComputeKernel
+  insize=1379 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=OneStep cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0  error: 1 plat 4 at CellularAutomata.compute(42): use of potentially uninitialized variable (alive)
+ ok=1 outsize=1933
+
+Cmd: compileComputeKernel
+  insize=1627 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=SetCells cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=554
+
+Cmd: compileComputeKernel
+  insize=1654 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=SetCells cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=646
+
+Cmd: compileComputeKernel
+  insize=1656 file=D:/Projekty/000_Shaders/Cellular Automata Compute Shader/Assets/Scripts/Shaders/CellularAutomata.compute kernel=OneStep cachingPP=1 ppOnly=0 stripLineD=0 buildPlatform=5 km=<;=1>,<UNITY_VERSION=202036> pKW=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING UNITY_ENABLE_DETAIL_NORMALMAP SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA UNITY_LIGHT_PROBE_PROXY_VOLUME UNITY_LIGHTMAP_FULL_HDR uKW=SHADER_STAGE_COMPUTE platform=d3d11 flags=0 ok=1 outsize=1957
+
+Unhandled exception: Protocol error - failed to read magic number (error -2147483644, transferred 0/4)
+
+Quitting shader compiler process

@@ -1,0 +1,59 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SetCells;
+#pragma kernel OneStep;
+
+#include "Cell.compute"
+
+int width;
+int height;
+RWTexture2D<float4> Result;
+RWStructuredBuffer<Cell> CellsA, CellsB;
+
+// Function check if the cell is alive or dead
+bool IsAlive(int x, int y)
+{
+    if(x < 0 || x >= width || y < 0 || y >= height)
+        return false;
+
+    if(CellsA[x + y * width].isAlive == true)
+        return true;
+    else
+        return false;
+}
+
+[numthreads(8, 8, 1)]
+void SetCells (uint3 id : SV_DispatchThreadID)
+{
+    if(any(id.xy >= uint2(width, height) || id.xy < uint2(0, 0)))
+        return;
+
+    //if(id.y>0 && id.y<10)
+    CellsB[id.x + id.y * width].isAlive = true;
+}
+
+[numthreads(8,8,1)]
+void OneStep (uint3 id : SV_DispatchThreadID)
+{
+    if(any(id.xy >= uint2(width, height) || id.xy < uint2(0, 0)))
+        return;
+
+    int count = 0;
+    // Check the 8 cells around the current cell
+    for(int i = -1; i <= 1; i++)
+        for(int j = -1; j <= 1; j++)
+            if(IsAlive(id.x + i, id.y + j))
+                count++;
+
+    bool alive = false;
+    // If the cell is alive and has less than 2 or more than 3 neighbors, it dies
+    if(IsAlive(id.x, id.y) && (count < 2 || count > 3))
+        alive = CellsB[id.x + id.y * width].isAlive = false;
+    // If the cell is dead and has 3 neighbors, it becomes alive
+    else if(!IsAlive(id.x, id.y) && count == 3)
+        alive = CellsB[id.x + id.y * width].isAlive = true;
+
+    if(alive)
+        Result[id.xy] = float4(1, 1, 1, 1);
+    else
+        Result[id.xy] = float4(0, 0, 0, 1);
+}
