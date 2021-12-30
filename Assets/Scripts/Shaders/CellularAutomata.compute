@@ -4,31 +4,43 @@
 
 #include "Cell.compute"
 
-int width;
-int height;
+uint width;
+uint height;
 RWTexture2D<float4> Result;
 RWStructuredBuffer<Cell> CellsA, CellsB;
+RWStructuredBuffer<bool> DebugBufferA;
 
 // Function check if the cell is alive or dead
-bool IsAlive(int x, int y)
+bool IsAlive(uint x, uint y)
 {
     if(x < 0 || x >= width || y < 0 || y >= height)
-        return false;
+        return 0;
 
-    if(CellsA[x + y * width].isAlive == true)
-        return true;
-    else
-        return false;
+    return CellsA[x + y * width].isAlive;
 }
 
 [numthreads(8, 8, 1)]
 void SetCells (uint3 id : SV_DispatchThreadID)
 {
-    if(any(id.xy >= uint2(width, height) || id.xy < uint2(0, 0)))
+    // Boundary check
+    if(id.x >= width || id.y >= height || id.x < 0 || id.y < 0)
         return;
 
-    //if(id.y>0 && id.y<10)
-    CellsB[id.x + id.y * width].isAlive = true;
+    CellsA[id.x + id.y * width].isAlive = 1;
+    //CellsB[id.x + id.y * width].isAlive = 1;
+
+    //CellsA[FlatIndex(1,1, width, height)].isAlive = 1;
+    //CellsA[FlatIndex(1,2, width, height)].isAlive = 1;
+    //CellsA[FlatIndex(2,1, width, height)].isAlive = 1;
+    //CellsA[FlatIndex(2,2, width, height)].isAlive = 1;
+
+
+    if(CellsA[FlatIndex(id.x,id.y, width, height)].isAlive == 1)
+        Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
+    else
+        Result[id.xy] = float4(0, 0, 0, 1);
+
+    DebugBufferA[id.x + id.y * width] = CellsA[FlatIndex(id.x,id.y, width, height)].isAlive;
 }
 
 [numthreads(8,8,1)]
@@ -44,16 +56,16 @@ void OneStep (uint3 id : SV_DispatchThreadID)
             if(IsAlive(id.x + i, id.y + j))
                 count++;
 
-    bool alive = false;
+    int alive = 0;
     // If the cell is alive and has less than 2 or more than 3 neighbors, it dies
     if(IsAlive(id.x, id.y) && (count < 2 || count > 3))
-        alive = CellsB[id.x + id.y * width].isAlive = false;
+        alive = CellsB[id.x + id.y * width].isAlive = 0;
     // If the cell is dead and has 3 neighbors, it becomes alive
     else if(!IsAlive(id.x, id.y) && count == 3)
-        alive = CellsB[id.x + id.y * width].isAlive = true;
+        alive = CellsB[id.x + id.y * width].isAlive = 1;
 
     if(alive)
-        Result[id.xy] = float4(1, 1, 1, 1);
+        Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
     else
         Result[id.xy] = float4(0, 0, 0, 1);
 }

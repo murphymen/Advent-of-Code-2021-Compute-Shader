@@ -1,7 +1,7 @@
 struct Cell
 {
-    bool isAlive;
-    int type;
+    uint isAlive;
+    uint type;
 };
 
 

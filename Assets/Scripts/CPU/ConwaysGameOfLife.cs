@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class ConwaysGameOfLife : MonoBehaviour
 {
-    public Texture input;
-
-    public int width = 1024;
-    public int height = 768;
+    public int width = 0;
+    public int height = 0;
 
     public ComputeShader compute;
-    [SerializeField]
-    public RenderTexture renderTexture;
-
+    private RenderTexture renderTexture;
     private ComputeBuffer bufferA, bufferB;
-
     public Material material;
 
     private int SetCellsKernel;
     private int OneStepKernel;
     private bool pingPong;
+
+    // Debug
+    public int[] debugCellsA;
+    private ComputeBuffer debugBufferA;
+
 
 	// Use this for initialization
 	void Start () {
@@ -35,7 +35,9 @@ public class ConwaysGameOfLife : MonoBehaviour
         compute.SetFloat("width", width);
         compute.SetFloat("height", height);
 
-        SetCells();
+        ClearRenderTexture();
+        //SetCells();
+        GetCells();
     }
 	
     void AllocateMemory()
@@ -43,8 +45,8 @@ public class ConwaysGameOfLife : MonoBehaviour
         if (bufferA != null) bufferA.Release();
         if (bufferB != null) bufferB.Release();
 
-        bufferA = new ComputeBuffer(width * height, 8, ComputeBufferType.Structured);
-        bufferB = new ComputeBuffer(width * height, 8, ComputeBufferType.Structured);
+        bufferA = new ComputeBuffer(width * height, sizeof(uint) * 2);
+        bufferB = new ComputeBuffer(width * height, sizeof(uint) * 2);
 
         renderTexture = new RenderTexture(width, height, 24);
         renderTexture.wrapMode = TextureWrapMode.Repeat;
@@ -52,13 +54,34 @@ public class ConwaysGameOfLife : MonoBehaviour
         renderTexture.filterMode = FilterMode.Point;
         renderTexture.useMipMap = false;
         renderTexture.Create();
+
+        // Debug
+        debugCellsA = new int[width * height];
+        debugBufferA = new ComputeBuffer(width * height, sizeof(uint));
+    }
+
+    // Clear render texture
+    void ClearRenderTexture()
+    {
+        Graphics.SetRenderTarget(renderTexture);
+        GL.Clear(false, false, Color.black);
     }
 
     void SetCells()
     {
+        compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
-        compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
+        compute.SetBuffer(SetCellsKernel, "DebugBufferA", debugBufferA);
         compute.Dispatch(SetCellsKernel, width / 8, height / 8, 1);
+
+        material.mainTexture = renderTexture;
+    }
+
+    void GetCells()
+    {
+        // Debug
+        debugBufferA.GetData(debugCellsA);
+        //bufferB.GetData(debugCellsB);
     }
 
     // One step of the cellular automata
@@ -86,6 +109,7 @@ public class ConwaysGameOfLife : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+        /*
         if (height < 1 || width < 1) return;
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -93,7 +117,8 @@ public class ConwaysGameOfLife : MonoBehaviour
             Step();
         }
 
-        Step();
+        //Step();
+        */
 	}
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -105,5 +130,9 @@ public class ConwaysGameOfLife : MonoBehaviour
     {
         if (bufferA != null) bufferA.Release();
         if (bufferB != null) bufferB.Release();
+
+        if (renderTexture != null) renderTexture.Release();
+
+        if (debugBufferA != null) debugBufferA.Release();
     }
 }
