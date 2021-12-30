@@ -1370,3 +1370,31 @@ Received Import Request.
 Start importing Assets/Scripts/Shaders/CellularAutomata.compute using Guid(88318769fbb45194b913a9da3e82c4b1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '405d9c03dd55cfedf7d5197baa8394d3') in 0.004145 seconds
   Import took 0.007357 seconds .
 
+========================================================================
+Received Import Request.
+  Time since last request: 153.905371 seconds.
+  path: Assets/Scripts/Shaders/CellularAutomata.compute
+  artifactKey: Guid(88318769fbb45194b913a9da3e82c4b1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Shaders/CellularAutomata.compute using Guid(88318769fbb45194b913a9da3e82c4b1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'c5e63fd2c14d6f3308c822d69762e538') in 0.008372 seconds
+  Import took 0.020158 seconds .
+
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.001571 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 0.42 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.119 seconds
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.41 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1805 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 85.5 MB.
+System memory in use after: 85.5 MB.
+
+Unloading 12 unused Assets to reduce memory usage. Loaded Objects now: 2472.
+Total: 2.407800 ms (FindLiveObjects: 0.243700 ms CreateObjectMapping: 0.073500 ms MarkObjects: 1.949000 ms  DeleteObjects: 0.140100 ms)
+

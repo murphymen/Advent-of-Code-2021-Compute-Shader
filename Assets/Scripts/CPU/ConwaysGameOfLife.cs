@@ -8,8 +8,8 @@ public class ConwaysGameOfLife : MonoBehaviour
     public int height = 0;
 
     public ComputeShader compute;
-    private RenderTexture renderTexture;
-    private ComputeBuffer bufferA, bufferB;
+    public RenderTexture renderTexture;
+    public ComputeBuffer bufferA, bufferB;
     public Material material;
 
     private int SetCellsKernel;
@@ -17,7 +17,7 @@ public class ConwaysGameOfLife : MonoBehaviour
     private bool pingPong;
 
     // Debug
-    public int[] debugCellsA;
+    public uint[] debugCellsA;
     private ComputeBuffer debugBufferA;
 
 
@@ -36,7 +36,7 @@ public class ConwaysGameOfLife : MonoBehaviour
         compute.SetFloat("height", height);
 
         ClearRenderTexture();
-        //SetCells();
+        SetCells();
         GetCells();
     }
 	
@@ -45,8 +45,8 @@ public class ConwaysGameOfLife : MonoBehaviour
         if (bufferA != null) bufferA.Release();
         if (bufferB != null) bufferB.Release();
 
-        bufferA = new ComputeBuffer(width * height, sizeof(uint) * 2);
-        bufferB = new ComputeBuffer(width * height, sizeof(uint) * 2);
+        bufferA = new ComputeBuffer(width * height, sizeof(uint));
+        //bufferB = new ComputeBuffer(width * height, sizeof(uint) * 2);
 
         renderTexture = new RenderTexture(width, height, 24);
         renderTexture.wrapMode = TextureWrapMode.Repeat;
@@ -56,7 +56,7 @@ public class ConwaysGameOfLife : MonoBehaviour
         renderTexture.Create();
 
         // Debug
-        debugCellsA = new int[width * height];
+        debugCellsA = new uint[width * height]; 
         debugBufferA = new ComputeBuffer(width * height, sizeof(uint));
     }
 
@@ -69,6 +69,8 @@ public class ConwaysGameOfLife : MonoBehaviour
 
     void SetCells()
     {
+        compute.SetFloat("width", width);
+        compute.SetFloat("height", height);
         compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
         compute.SetBuffer(SetCellsKernel, "DebugBufferA", debugBufferA);
@@ -80,8 +82,7 @@ public class ConwaysGameOfLife : MonoBehaviour
     void GetCells()
     {
         // Debug
-        debugBufferA.GetData(debugCellsA);
-        //bufferB.GetData(debugCellsB);
+        bufferA.GetData(debugCellsA);
     }
 
     // One step of the cellular automata

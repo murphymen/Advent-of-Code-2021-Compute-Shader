@@ -162,12 +162,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24bcce62048d8e344a96590e2ad38dff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  input: {fileID: 0}
-  width: 1024
-  height: 768
+  width: 16
+  height: 16
   compute: {fileID: 7200000, guid: 88318769fbb45194b913a9da3e82c4b1, type: 3}
-  renderTexture: {fileID: 0}
   material: {fileID: 2100000, guid: 4221e7aae089fec4f92b40dedb58db70, type: 2}
+  debugCellsA: 
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

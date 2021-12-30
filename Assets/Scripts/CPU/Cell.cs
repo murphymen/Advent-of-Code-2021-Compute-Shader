@@ -5,6 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public struct Cell
 {
-    uint isAlive;
-    uint type;
+    [SerializeField]
+    public uint isAlive;
+    [SerializeField]
+    public uint type;
 }
