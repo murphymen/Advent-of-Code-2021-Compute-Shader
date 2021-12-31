@@ -134,4 +134,31 @@ public class ConwaysGameOfLife : MonoBehaviour
 
         //if (debugBufferA != null) debugBufferA.Release();
     }
+
+    // On mouse click save texture to .png file
+    void OnGUI()
+    {
+        if (GUI.Button(new Rect(10, 10, 100, 30), "Save")
+            & (renderTexture != null))
+        {
+            RenderTexture.active = renderTexture;
+            Texture2D texture = new Texture2D(renderTexture.width, renderTexture.height, TextureFormat.ARGB32, false);
+            texture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+            texture.Apply();
+            RenderTexture.active = null;
+
+            byte[] bytes = texture.EncodeToPNG();
+            System.IO.File.WriteAllBytes(@"C:\Users\Public\Documents\output.png", bytes);
+        }
+
+        if (GUI.Button(new Rect(10, 50, 100, 30), "Clear"))
+        {
+            ClearRenderTexture();
+        }
+
+        if (GUI.Button(new Rect(10, 90, 100, 30), "Step"))
+        {
+            Step();
+        }
+    }
 }

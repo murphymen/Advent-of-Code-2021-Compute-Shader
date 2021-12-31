@@ -3,6 +3,7 @@
 #pragma kernel OneStep;
 
 #include "Cell.compute"
+#include "Random.cginc"
 
 uint width;
 uint height;
@@ -37,6 +38,29 @@ void SetCells (uint3 id : SV_DispatchThreadID)
     CellsA[FlatIndex(5,7, width, height)].isAlive = 1;
     CellsA[FlatIndex(5,8, width, height)].isAlive = 1;
     CellsA[FlatIndex(5,9, width, height)].isAlive = 1;
+
+/*
+    // Make square of cells alive in cellsA
+    for(uint i = 2; i < 6; i++)
+    {
+        for(uint j = 2; j < 7; j++)
+        {
+            CellsA[FlatIndex(i,j, width, height)].isAlive = 1;
+        }
+    }*/
+
+    // make 50 random cells alive in cellsA
+    NumberGenerator rnd;
+    rnd.SetSeed(666);
+
+    for(uint i = 0; i < 70000; i++)
+    {
+        uint x = rnd.GetCurrentInt() % width;
+        uint y = rnd.GetCurrentInt() % height;
+        CellsA[FlatIndex(x,y, width, height)].isAlive = 1;
+    }
+
+
 
     
     tmp = CellsA[flatIndex].isAlive;
