@@ -71,6 +71,7 @@ public class ConwaysGameOfLife : MonoBehaviour
     {
         compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
+        compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
         compute.Dispatch(SetCellsKernel, width / 8, height / 8, 1);
 
         material.mainTexture = renderTexture;

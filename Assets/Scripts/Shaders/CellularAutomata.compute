@@ -29,32 +29,22 @@ void SetCells (uint3 id : SV_DispatchThreadID)
     uint flatIndex = id.x + (id.y * width);
     uint tmp = 1;
 
-    //CellsA[flatIndex] = tmp;
-    //CellsB[id.x + id.y * width].isAlive = 1;
+    CellsA[flatIndex].isAlive = 0;
+    CellsB[flatIndex].isAlive = 0;
 
-    CellsA[100].isAlive = 1;
-    CellsA[101].isAlive = 1;
-    CellsA[102].isAlive = 1;
-    CellsA[103].isAlive = 1;
+    CellsA[FlatIndex(5,5, width, height)].isAlive = 1;
+    CellsA[FlatIndex(5,6, width, height)].isAlive = 1;
+    CellsA[FlatIndex(5,7, width, height)].isAlive = 1;
+    CellsA[FlatIndex(5,8, width, height)].isAlive = 1;
+    CellsA[FlatIndex(5,9, width, height)].isAlive = 1;
 
-/*
-    uint tmp = 0;
-    if(id.x > 2 && id.x < 4)
-        tmp = 1;
-    else
-        tmp = 0;
-        */
     
     tmp = CellsA[flatIndex].isAlive;
 
     if(CellsA[flatIndex].isAlive == 1)
-        Result[id.xy] = float4(1,1,1,1);//float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
+        Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
     else
         Result[id.xy] = float4(0, 0, 0, 1);
-
-    //Result[id.xy] = float4(1,1,1,1);
-
-    //DebugBufferA[flatIndex] = flatIndex;
 }
 
 [numthreads(8,8,1)]
@@ -63,7 +53,9 @@ void OneStep (uint3 id : SV_DispatchThreadID)
     if(any(id.xy >= uint2(width, height) || id.xy < uint2(0, 0)))
         return;
 
+    uint flatIndex = id.x + (id.y * width);
     int count = 0;
+
     // Check the 8 cells around the current cell
     for(int i = -1; i <= 1; i++)
         for(int j = -1; j <= 1; j++)
@@ -73,10 +65,13 @@ void OneStep (uint3 id : SV_DispatchThreadID)
     int alive = 0;
     // If the cell is alive and has less than 2 or more than 3 neighbors, it dies
     if(IsAlive(id.x, id.y) && (count < 2 || count > 3))
-        alive = CellsB[id.x + id.y * width].isAlive = 0;
+        alive = CellsB[flatIndex].isAlive = 0;
     // If the cell is dead and has 3 neighbors, it becomes alive
     else if(!IsAlive(id.x, id.y) && count == 3)
-        alive = CellsB[id.x + id.y * width].isAlive = 1;
+        alive = CellsB[flatIndex].isAlive = 1;
+    // Otherwise, the cell remains the same
+    else
+        alive = CellsB[flatIndex].isAlive = CellsA[id.x + id.y * width].isAlive;
 
     if(alive)
         Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 1);
