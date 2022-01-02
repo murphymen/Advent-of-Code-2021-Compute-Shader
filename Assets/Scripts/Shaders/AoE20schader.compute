@@ -1,0 +1,83 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SetCells;
+#pragma kernel DrawCells;
+#pragma kernel OneStep;
+
+#include "Cell.compute"
+#include "Random.cginc"
+
+uint width;
+uint height;
+uint imageWidth;
+uint imageHeight;
+RWTexture2D<float4> Result;
+RWStructuredBuffer<Cell> CellsA, CellsB;
+RWStructuredBuffer<uint> ImageBuffer;
+
+
+
+// Function check if the cell is alive or dead
+uint IsAlive(uint x, uint y)
+{
+    if(x < 0 || x >= width || y < 0 || y >= height)
+        return 0;
+
+    return CellsA[x + y * width].isAlive;
+}
+
+[numthreads(8, 8, 1)]
+void SetCells (uint3 id : SV_DispatchThreadID)
+{
+    // Boundary check
+    if(id.x >= width || id.y >= height)
+        return;
+
+    uint flatIndex = id.x + (id.y * width);
+
+    // Copy values from image buffer to the cellsA at center of the grid
+    
+
+    
+}
+
+[numthreads(8, 8, 1)]
+void DrawCells (uint3 id : SV_DispatchThreadID)
+{
+    // Boundary check
+    if(id.x >= width || id.y >= height)
+        return;
+
+    uint flatIndex = id.x + (id.y * width);
+    
+
+    if(CellsA[flatIndex].isAlive == 1)
+        Result[id.xy] = float4(0, 0, 1, 1);
+    else
+        Result[id.xy] = float4(0, 0, 0, 1);
+}
+
+[numthreads(8,8,1)]
+void OneStep (uint3 id : SV_DispatchThreadID)
+{
+    if(any(id.xy >= uint2(width, height) || id.xy < uint2(0, 0)))
+        return;
+
+    uint flatIndex = id.x + (id.y * width);
+    
+    // Iterate over adjacent cells
+    uint [8]aliveNeighbours;
+    int count = 0;
+    for(int i = -1; i <= 1; i++)
+    {
+        for(int j = -1; j <= 1; j++)
+        {
+            // Boundary check
+            if(id.x + i < 0 || id.x + i >= width || id.y + j < 0 || id.y + j >= height)
+                // If the cell is out of bounds, it's a dead cell
+                aliveNeighbours[count] = 0;
+            else
+                // Otherwise, it's alive
+                aliveNeighbours[count] = CellsA[(id.x + i) + (id.y + j) * width].isAlive;
+        }
+    }
+}
