@@ -17,9 +17,12 @@ public class AoE20 : MonoBehaviour
     public RenderTexture renderTexture;
     public ComputeBuffer bufferA, bufferB;
     public ComputeBuffer imageBuffer;
+    public ComputeBuffer enchanceTableBuffer;
     public Material material;
 
     private int SetCellsKernel;
+    private int DrawCellsAKernel;
+    private int DrawCellsBKernel;
     private int OneStepKernel;
     private bool pingPong;
 
@@ -27,16 +30,24 @@ public class AoE20 : MonoBehaviour
         if (height < 1 || width < 1) return;
 
         OneStepKernel = compute.FindKernel("OneStep");
+        DrawCellsAKernel = compute.FindKernel("DrawCellsA");
+        DrawCellsBKernel = compute.FindKernel("DrawCellsB");
         SetCellsKernel = compute.FindKernel("SetCells");
 
         AllocateMemory();
+        LoadInput();
+
+        enchanceTableBuffer = new ComputeBuffer(enchanceTable.Length, sizeof(int));
+        enchanceTableBuffer.SetData(enchanceTable);
+        imageBuffer = new ComputeBuffer(image.Length, sizeof(int));
+        imageBuffer.SetData(image);
 
         pingPong = true;
 
         compute.SetInt("width", width);
         compute.SetInt("height", height);
 
-        //SetCells();
+        SetCells();
         //GetCells();
     }
 	
@@ -54,8 +65,6 @@ public class AoE20 : MonoBehaviour
         renderTexture.filterMode = FilterMode.Point;
         renderTexture.useMipMap = false;
         renderTexture.Create();
-
-        LoadInput();
     }
 
     void SetCells()
@@ -63,7 +72,22 @@ public class AoE20 : MonoBehaviour
         compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
         compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
-        compute.Dispatch(SetCellsKernel, width / 8, height / 8, 1);
+        compute.SetBuffer(SetCellsKernel, "enchanceTableBuffer", enchanceTableBuffer);
+        compute.SetBuffer(SetCellsKernel, "imageBuffer", imageBuffer);
+        compute.SetInt("imageWidth", state.width);
+        compute.SetInt("imageHeight", state.height);
+        enchanceTableBuffer.SetData(enchanceTable);
+        compute.Dispatch(SetCellsKernel, 1, 1, 1);
+
+        DrawCellsA();
+        //material.mainTexture = renderTexture;
+    }
+
+    void DrawCellsA()
+    {
+        compute.SetTexture(DrawCellsAKernel, "Result", renderTexture);
+        compute.SetBuffer(DrawCellsAKernel, "CellsA", bufferA);
+        compute.Dispatch(DrawCellsAKernel, width / 8, height / 8, 1);
 
         material.mainTexture = renderTexture;
     }
@@ -85,6 +109,7 @@ public class AoE20 : MonoBehaviour
             pingPong = true;
         }
 
+        compute.SetBuffer(OneStepKernel, "enchanceTableBuffer", enchanceTableBuffer);
         compute.Dispatch(OneStepKernel, width / 8, height / 8, 1);
         material.mainTexture = renderTexture;
     }
@@ -107,17 +132,19 @@ public class AoE20 : MonoBehaviour
 
         // from line 2 to last line, split each line into an array of integers (image) where '.' is 0 and '#' is 1
         // add each integer to image array
-        image = new int[lines.Length * lines[4].Length];
-        for (int i = 1; i < lines.Length; i++)
+        image = new int[5 * lines[4].Length];
+        for (int i = 2; i < lines.Length; i++)
         {
             for (int j = 0; j < lines[i].Length; j++)
             {
+                int index = (4-(i - 2)) * lines[i].Length + j;
                 if (lines[i][j] == '.')
-                    image[i + lines[i].Length * j] = 0;
+                    image[index] = 0;
                 else
-                    image[i + lines[i].Length * j] = 1;
+                    image[index] = 1;
             }
         }
+
 
         // Create a new SimulationState object and pass the all image data to object.cells.isAlive
         state = new SimulationState();
@@ -140,6 +167,8 @@ public class AoE20 : MonoBehaviour
     {
         if (bufferA != null) bufferA.Release();
         if (bufferB != null) bufferB.Release();
+        if (imageBuffer != null) imageBuffer.Release();
+        if (enchanceTableBuffer != null) enchanceTableBuffer.Release();
 
         if (renderTexture != null) renderTexture.Release();
 
@@ -149,6 +178,7 @@ public class AoE20 : MonoBehaviour
     // On mouse click save texture to .png file
     void OnGUI()
     {
+        /*
         if (GUI.Button(new Rect(10, 10, 100, 30), "Save")
             & (renderTexture != null))
         {
@@ -160,11 +190,12 @@ public class AoE20 : MonoBehaviour
 
             byte[] bytes = texture.EncodeToPNG();
             System.IO.File.WriteAllBytes(@"C:\Users\Public\Documents\output.png", bytes);
-        }
+        }*/
 
         if (GUI.Button(new Rect(10, 90, 100, 30), "Step"))
         {
             Step();
+            DrawCellsA();
         }
     }
 }

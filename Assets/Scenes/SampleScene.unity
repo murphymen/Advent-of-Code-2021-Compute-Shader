@@ -241,8 +241,8 @@ MonoBehaviour:
   lines: []
   enchanceTable: 
   image: 
-  width: 1024
-  height: 768
-  compute: {fileID: 7200000, guid: 88318769fbb45194b913a9da3e82c4b1, type: 3}
+  width: 320
+  height: 240
+  compute: {fileID: 7200000, guid: dd53cae15285a8f438b246dab236545a, type: 3}
   renderTexture: {fileID: 0}
-  material: {fileID: 0}
+  material: {fileID: 2100000, guid: 4221e7aae089fec4f92b40dedb58db70, type: 2}

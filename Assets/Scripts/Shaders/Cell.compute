@@ -5,7 +5,7 @@ struct Cell
 };
 
 
-uint FlatIndex(uint x, uint y, uint dimmX, uint dimmY)
+uint FlatIndex(uint x, uint y, uint dimmX)
 {
     return x + y * dimmX;
 }
