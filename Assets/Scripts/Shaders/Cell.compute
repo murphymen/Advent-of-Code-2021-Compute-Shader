@@ -2,15 +2,5 @@ struct Cell
 {
     uint isAlive;
     uint type;
+    uint value;
 };
-
-
-uint FlatIndex(uint x, uint y, uint dimmX)
-{
-    return x + y * dimmX;
-}
-
-uint FlatIndex(uint2 index, uint2 dimm)
-{
-    return index.x + index.y * dimm.x;
-}

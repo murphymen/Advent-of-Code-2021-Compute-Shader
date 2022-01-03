@@ -1,3 +1,4 @@
+/*
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel SetCells;
 #pragma kernel OneStep;
@@ -102,3 +103,4 @@ void OneStep (uint3 id : SV_DispatchThreadID)
     else
         Result[id.xy] = float4(0, 0, 0, 1);
 }
+*/

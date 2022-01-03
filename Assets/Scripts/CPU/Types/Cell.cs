@@ -9,4 +9,6 @@ public struct Cell
     public uint isAlive;
     [SerializeField]
     public uint type;
+    [SerializeField]
+    public uint value;
 }
