@@ -1,8 +1,9 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel SetCells;
-#pragma kernel DrawCellsA;
-#pragma kernel DrawCellsB;
+#pragma kernel ClearBuffers;
 #pragma kernel OneStep;
+
+
 
 // Debug symbols
 #pragma enable_d3d11_debug_symbols
@@ -19,7 +20,9 @@ RWStructuredBuffer<uint> enchanceTableBuffer;
 RWStructuredBuffer<uint> imageBuffer;
 
 // Debugging
-RWStructuredBuffer<uint2> debugBuffer;
+//RWStructuredBuffer<uint> debugBuffer;
+RWStructuredBuffer<uint> counterBuffer;
+//uint code = 0;
 
 
 uint FlatIndex(uint x, uint y, uint dimmX)
@@ -44,16 +47,17 @@ uint IsAlive(uint x, uint y)
 uint GetCode(uint x, uint y)
 {
     uint code = 0;
-    code |= IsAlive(x - 1, y - 1) << 0;
-    code |= IsAlive(x, y - 1) << 1;
-    code |= IsAlive(x + 1, y - 1) << 2;
-    code |= IsAlive(x - 1, y) << 3;
-    code |= IsAlive(x, y) << 4;
-    code |= IsAlive(x + 1, y) << 5;
-    code |= IsAlive(x - 1, y + 1) << 6;
-    code |= IsAlive(x, y + 1) << 7;
-    code |= IsAlive(x + 1, y + 1) << 8;
-
+    int position = 0;
+    for(int i = -1; i <= 1; i++)
+    {
+        for(int j = -1; j <= 1; j++)
+        {
+            code <<= 1;
+            if(IsAlive(x + j, y + i)==1)
+                code |= 1;
+        }
+        position++;
+    }
     return code;
 }
 
@@ -65,35 +69,18 @@ void SetCells (uint3 id : SV_DispatchThreadID)
         return;
 
     uint flatIndex = id.x + (id.y * width);
-    uint screenCenterX = width / 2;
-    uint screenCenterY = height / 2;
 
     for(uint j=0; j<imageHeight; j++)
     {
         for(uint i=0; i<imageWidth; i++)
         {
-            CellsA[i + j * width].isAlive = imageBuffer[i+j*imageWidth];
+            CellsA[i+(height/2) + (j+(height/2)) * width].isAlive = imageBuffer[i+j*imageWidth];
         }
     }
 }
 
 [numthreads(8, 8, 1)]
-void DrawCellsA (uint3 id : SV_DispatchThreadID)
-{
-    // Boundary check
-    if(id.x >= width || id.y >= height)
-        return;
-
-    uint flatIndex = id.x + (id.y * width);
-    
-    if(CellsA[flatIndex].isAlive == 1)
-        Result[id.xy] = float4(0, 0, 1, 1);
-    else
-        Result[id.xy] = float4(0, 0, 0, 1);
-}
-
-[numthreads(8, 8, 1)]
-void DrawCellsB (uint3 id : SV_DispatchThreadID)
+void ClearBuffers (uint3 id : SV_DispatchThreadID)
 {
     // Boundary check
     if(id.x >= width || id.y >= height)
@@ -102,10 +89,12 @@ void DrawCellsB (uint3 id : SV_DispatchThreadID)
     // Make flatIdex with y up to down
     uint flatIndex = id.x + (id.y * width);
     
-    if(CellsB[flatIndex].isAlive == 1)
-        Result[id.xy] = float4(0, 0, 1, 1);
-    else
-        Result[id.xy] = float4(0, 0, 0, 1);
+    CellsA[flatIndex].isAlive = 0;
+    CellsA[flatIndex].value = 0;
+    CellsA[flatIndex].type = 0;
+    CellsB[flatIndex].isAlive = 0;
+    CellsB[flatIndex].value = 0;
+    CellsB[flatIndex].type = 0;
 }
 
 [numthreads(8,8,1)]
@@ -117,14 +106,18 @@ void OneStep (uint3 id : SV_DispatchThreadID)
     uint flatIndex = id.x + (id.y * width);
     uint flatIndexPlus = (id.x+2) + ((id.y+2) * width);
     
-    uint code = GetCode(id.x, id.y);
-
-    CellsB[flatIndexPlus].isAlive = enchanceTableBuffer[code];
-    CellsB[flatIndexPlus].value = code;
+    uint code = GetCode(id.x, id.y); 
+    //debugBuffer[0] = code;
+    CellsB[flatIndex].isAlive = enchanceTableBuffer[code];
+    //CellsB[flatIndex].value = code;
 
     // Draw cell on texture
     if(CellsB[flatIndex].isAlive == 1)
+    {
         Result[id.xy] = float4(0.5, 0.5, 0.5, 1);
+        //debugBuffer[0] += 1;
+        counterBuffer.IncrementCounter();    
+    }
     else
         Result[id.xy] = float4(0, 0, 0, 1);
 }

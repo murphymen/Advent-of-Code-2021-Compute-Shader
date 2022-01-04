@@ -22,24 +22,26 @@ public class AoE20 : MonoBehaviour
     public Material material;
 
     private int SetCellsKernel;
-    private int DrawCellsAKernel;
-    private int DrawCellsBKernel;
+    private int ClearBuffersKernel;
     private int OneStepKernel;
     private bool pingPong;
 
     // Debug
     public Cell[] cellsADebug;
     public Cell[] cellsBDebug;
+    //public ComputeBuffer debugBuffer;
+    public int[] debugArray = new int[1];
+    public ComputeBuffer counterBuffer;
 
     void Start () {
         if (height < 1 || width < 1) return;
 
         OneStepKernel = compute.FindKernel("OneStep");
-        DrawCellsAKernel = compute.FindKernel("DrawCellsA");
-        DrawCellsBKernel = compute.FindKernel("DrawCellsB");
+        ClearBuffersKernel = compute.FindKernel("ClearBuffers");
         SetCellsKernel = compute.FindKernel("SetCells");
 
         AllocateMemory();
+        ClearBuffers();
         LoadInput();
 
         enchanceTableBuffer = new ComputeBuffer(enchanceTable.Length, sizeof(int));
@@ -55,7 +57,7 @@ public class AoE20 : MonoBehaviour
         SetCells();
         //GetCells();
     }
-	
+
     void AllocateMemory()
     {
         if (bufferA != null) bufferA.Release();
@@ -71,46 +73,46 @@ public class AoE20 : MonoBehaviour
         renderTexture.useMipMap = false;
         renderTexture.Create();
 
-        cellsADebug = new Cell[width * height];
-        cellsBDebug = new Cell[width * height];
+        //cellsADebug = new Cell[width * height];
+        //cellsBDebug = new Cell[width * height];
+        //debugBuffer = new ComputeBuffer(1, sizeof(uint));
+        counterBuffer = new ComputeBuffer(1, 4, ComputeBufferType.Counter);
     }
 
     void SetCells()
     {
         compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
-        compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
+        //compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
         compute.SetBuffer(SetCellsKernel, "enchanceTableBuffer", enchanceTableBuffer);
         compute.SetBuffer(SetCellsKernel, "imageBuffer", imageBuffer);
         compute.SetInt("imageWidth", state.width);
         compute.SetInt("imageHeight", state.height);
+        //compute.SetBuffer(SetCellsKernel, "debugBuffer", debugBuffer);
         enchanceTableBuffer.SetData(enchanceTable);
-        compute.Dispatch(SetCellsKernel, 1, 1, 1);
-        //material.mainTexture = renderTexture;
+        //compute.Dispatch(SetCellsKernel, 1, 1, 1);
+        compute.DispatchThreads(SetCellsKernel, width, height, 1);
     }
 
+    /*
     void GetCells()
     {
         bufferA.GetData(cellsADebug);
         bufferB.GetData(cellsBDebug);
+
+        //debugBuffer.GetData(debugArray);
+        
+        Debug.Log(debugArray[0]);
     }
+*/
 
-    void DrawCellsA()
+    public void ClearBuffers()
     {
-        compute.SetTexture(DrawCellsAKernel, "Result", renderTexture);
-        compute.SetBuffer(DrawCellsAKernel, "CellsA", bufferA);
-        compute.Dispatch(DrawCellsAKernel, width / 8, height / 8, 1);
-
-        material.mainTexture = renderTexture;
-    }
-
-    void DrawCellsB()
-    {
-        compute.SetTexture(DrawCellsBKernel, "Result", renderTexture);
-        compute.SetBuffer(DrawCellsBKernel, "CellsB", bufferB);
-        compute.Dispatch(DrawCellsBKernel, width / 8, height / 8, 1);        
-
-        material.mainTexture = renderTexture;
+        compute.SetBuffer(ClearBuffersKernel, "CellsA", bufferA);
+        compute.SetBuffer(ClearBuffersKernel, "CellsB", bufferB);
+        counterBuffer.SetCounterValue(0);
+        compute.SetBuffer(ClearBuffersKernel, "counterBuffer", counterBuffer);
+        compute.DispatchThreads(ClearBuffersKernel, width, height, 1);
     }
 
     public void Step()
@@ -131,10 +133,14 @@ public class AoE20 : MonoBehaviour
         }
 
         compute.SetBuffer(OneStepKernel, "enchanceTableBuffer", enchanceTableBuffer);
-        compute.Dispatch(OneStepKernel, width / 8, height / 8, 1);
-    
+        counterBuffer.SetCounterValue(0);
+        compute.SetBuffer(OneStepKernel, "counterBuffer", counterBuffer);
+        //compute.Dispatch(OneStepKernel, width / 8, height / 8, 1);
+        compute.DispatchThreads(OneStepKernel, width, height, 1);
+        counterBuffer.GetData(debugArray);
+
         material.mainTexture = renderTexture;
-        GetCells();
+        //GetCells();
     }
 
     public void LoadInput()
@@ -186,14 +192,15 @@ public class AoE20 : MonoBehaviour
 
     void OnDestroy()
     {
-        if (bufferA != null) bufferA.Release();
-        if (bufferB != null) bufferB.Release();
-        if (imageBuffer != null) imageBuffer.Release();
-        if (enchanceTableBuffer != null) enchanceTableBuffer.Release();
+        bufferA?.Dispose();
+        bufferB?.Dispose();
+        imageBuffer?.Dispose();
+        enchanceTableBuffer?.Dispose();
 
-        if (renderTexture != null) renderTexture.Release();
+        renderTexture?.Release();
 
-        //if (debugBufferA != null) debugBufferA.Release();
+        counterBuffer?.Dispose();
+        //debugBuffer?.Dispose();
     }
 
     // On mouse click save texture to .png file
@@ -218,16 +225,7 @@ public class AoE20 : MonoBehaviour
             Step();
         }
 
-        // Button to draw cellsA
-        if (GUI.Button(new Rect(10, 50, 100, 30), "Draw A"))
-        {
-            DrawCellsA();
-        }
-
-        // Button to draw cellsB
-        if (GUI.Button(new Rect(10, 70, 100, 30), "Draw B"))
-        {
-            DrawCellsB();
-        }
+        // get counter value
+        GUI.Label(new Rect(10, 50, 100, 30), debugArray[0].ToString());
     }    
 }
