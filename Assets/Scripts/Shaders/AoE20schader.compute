@@ -107,16 +107,14 @@ void OneStep (uint3 id : SV_DispatchThreadID)
     uint flatIndexPlus = (id.x+2) + ((id.y+2) * width);
     
     uint code = GetCode(id.x, id.y); 
-    //debugBuffer[0] = code;
     CellsB[flatIndex].isAlive = enchanceTableBuffer[code];
-    //CellsB[flatIndex].value = code;
 
     // Draw cell on texture
     if(CellsB[flatIndex].isAlive == 1)
     {
         Result[id.xy] = float4(0.5, 0.5, 0.5, 1);
-        //debugBuffer[0] += 1;
-        counterBuffer.IncrementCounter();    
+        if(id.x > 100 && id.x < width - 100 && id.y > 100 && id.y < height - 100)
+            counterBuffer.IncrementCounter();    
     }
     else
         Result[id.xy] = float4(0, 0, 0, 1);

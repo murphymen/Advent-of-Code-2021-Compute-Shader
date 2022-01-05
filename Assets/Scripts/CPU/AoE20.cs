@@ -10,6 +10,8 @@ public class AoE20 : MonoBehaviour
     public string[] lines;
     public int[] enchanceTable;
     public int[] image;
+    private bool go = false;
+    private int iteration = 0;
 
     public int width = 0;
     public int height = 0;
@@ -27,11 +29,9 @@ public class AoE20 : MonoBehaviour
     private bool pingPong;
 
     // Debug
-    public Cell[] cellsADebug;
-    public Cell[] cellsBDebug;
-    //public ComputeBuffer debugBuffer;
-    public int[] debugArray = new int[1];
     public ComputeBuffer counterBuffer;
+    public ComputeBuffer argsBuffer;
+    uint[] counter = new uint[1];
 
     void Start () {
         if (height < 1 || width < 1) return;
@@ -55,7 +55,16 @@ public class AoE20 : MonoBehaviour
         compute.SetInt("height", height);
 
         SetCells();
-        //GetCells();
+    }
+
+    void Update()
+    {
+        if (go)
+        {
+            Step();
+            iteration++;
+            if (iteration < 60) go = false;
+        }
     }
 
     void AllocateMemory()
@@ -73,38 +82,21 @@ public class AoE20 : MonoBehaviour
         renderTexture.useMipMap = false;
         renderTexture.Create();
 
-        //cellsADebug = new Cell[width * height];
-        //cellsBDebug = new Cell[width * height];
-        //debugBuffer = new ComputeBuffer(1, sizeof(uint));
         counterBuffer = new ComputeBuffer(1, 4, ComputeBufferType.Counter);
+        argsBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.IndirectArguments);
     }
 
     void SetCells()
     {
         compute.SetTexture(SetCellsKernel, "Result", renderTexture);
         compute.SetBuffer(SetCellsKernel, "CellsA", bufferA);
-        //compute.SetBuffer(SetCellsKernel, "CellsB", bufferB);
         compute.SetBuffer(SetCellsKernel, "enchanceTableBuffer", enchanceTableBuffer);
         compute.SetBuffer(SetCellsKernel, "imageBuffer", imageBuffer);
         compute.SetInt("imageWidth", state.width);
         compute.SetInt("imageHeight", state.height);
-        //compute.SetBuffer(SetCellsKernel, "debugBuffer", debugBuffer);
         enchanceTableBuffer.SetData(enchanceTable);
-        //compute.Dispatch(SetCellsKernel, 1, 1, 1);
         compute.DispatchThreads(SetCellsKernel, width, height, 1);
     }
-
-    /*
-    void GetCells()
-    {
-        bufferA.GetData(cellsADebug);
-        bufferB.GetData(cellsBDebug);
-
-        //debugBuffer.GetData(debugArray);
-        
-        Debug.Log(debugArray[0]);
-    }
-*/
 
     public void ClearBuffers()
     {
@@ -135,12 +127,15 @@ public class AoE20 : MonoBehaviour
         compute.SetBuffer(OneStepKernel, "enchanceTableBuffer", enchanceTableBuffer);
         counterBuffer.SetCounterValue(0);
         compute.SetBuffer(OneStepKernel, "counterBuffer", counterBuffer);
-        //compute.Dispatch(OneStepKernel, width / 8, height / 8, 1);
         compute.DispatchThreads(OneStepKernel, width, height, 1);
-        counterBuffer.GetData(debugArray);
+
+        // Get count from counterBuffer to argsBuffer
+        ComputeBuffer.CopyCount(counterBuffer, argsBuffer, 0);
+        argsBuffer.GetData(counter);
+
+        Debug.Log("Counter: " + counter[0]);
 
         material.mainTexture = renderTexture;
-        //GetCells();
     }
 
     public void LoadInput()
@@ -161,7 +156,7 @@ public class AoE20 : MonoBehaviour
 
         // from line 2 to last line, split each line into an array of integers (image) where '.' is 0 and '#' is 1
         // add each integer to image array
-        image = new int[5 * lines[4].Length];
+        image = new int[(lines.Length-2) * lines[4].Length];
         for (int i = 2; i < lines.Length; i++)
         {
             for (int j = 0; j < lines[i].Length; j++)
@@ -200,7 +195,7 @@ public class AoE20 : MonoBehaviour
         renderTexture?.Release();
 
         counterBuffer?.Dispose();
-        //debugBuffer?.Dispose();
+        argsBuffer?.Dispose();    
     }
 
     // On mouse click save texture to .png file
@@ -220,12 +215,15 @@ public class AoE20 : MonoBehaviour
             System.IO.File.WriteAllBytes(@"C:\Users\Public\Documents\output.png", bytes);
         }*/
 
-        if (GUI.Button(new Rect(10, 90, 100, 30), "Step"))
+        if (GUI.Button(new Rect(10, 90, 100, 30), "Go"))
         {
-            Step();
+            go = true;
         }
 
         // get counter value
-        GUI.Label(new Rect(10, 50, 100, 30), debugArray[0].ToString());
+        GUI.Label(new Rect(10, 50, 100, 30), counter[0].ToString());
+
+        // Print iteration
+        GUI.Label(new Rect(10, 70, 100, 30), "Iteration: " + iteration.ToString());
     }    
 }
