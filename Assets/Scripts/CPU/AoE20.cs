@@ -10,7 +10,6 @@ public class AoE20 : MonoBehaviour
     public string[] lines;
     public int[] enchanceTable;
     public int[] image;
-    private bool go = false;
     private int iteration = 0;
 
     public int width = 0;
@@ -59,12 +58,9 @@ public class AoE20 : MonoBehaviour
 
     void Update()
     {
-        if (go)
-        {
             Step();
             iteration++;
-            if (iteration < 60) go = false;
-        }
+            //if (iteration < 60) go = false;
     }
 
     void AllocateMemory()
@@ -217,7 +213,6 @@ public class AoE20 : MonoBehaviour
 
         if (GUI.Button(new Rect(10, 90, 100, 30), "Go"))
         {
-            go = true;
         }
 
         // get counter value
