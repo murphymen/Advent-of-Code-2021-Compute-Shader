@@ -4,9 +4,8 @@
 #pragma kernel OneStep;
 
 
-
 // Debug symbols
-#pragma enable_d3d11_debug_symbols
+//#pragma enable_d3d11_debug_symbols
 #include "Cell.compute"
 #include "Random.cginc"
 
@@ -20,9 +19,7 @@ RWStructuredBuffer<uint> enchanceTableBuffer;
 RWStructuredBuffer<uint> imageBuffer;
 
 // Debugging
-//RWStructuredBuffer<uint> debugBuffer;
 RWStructuredBuffer<uint> counterBuffer;
-//uint code = 0;
 
 
 uint FlatIndex(uint x, uint y, uint dimmX)
